@@ -1,12 +1,16 @@
 package com.user.mgmt.service;
 
 import java.util.List;
+import java.util.Optional;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import com.user.mgmt.entity.User;
+import com.user.mgmt.exception.UserAlreadyExistException;
 import com.user.mgmt.repo.UserRepository;
 
 @Service
@@ -37,8 +41,23 @@ public class UserService {
 		return passwordEncoder.encode(password);
 	}
 
-	public List<User> getAllUsers() {
+	public Page<User> getAllUsers(int page, int size) {
+		return userRepository.findAll(PageRequest.of(page, size));
+	}
+
+	public List<User> getUsers() {
 		return userRepository.findAll();
 	}
+
+	public boolean isUserExist(String userName) {
+		
+		Optional<User> optionalUser = userRepository.findById(userName);
+		if(optionalUser.isPresent()) {
+			return true;
+		}
+		return false;
+	}
+
+	
 
 }

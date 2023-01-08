@@ -5,7 +5,6 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import java.util.Spliterator;
 
 import javax.validation.ConstraintViolation;
 import javax.validation.Validator;
@@ -42,6 +41,21 @@ public class UserController {
 	@Autowired
 	private Validator validator;
 
+	@GetMapping("/ping")
+	public ResponseEntity<Boolean> ping(){
+		return new ResponseEntity<Boolean>(true,HttpStatus.OK);
+	} 
+	
+	
+	@GetMapping("/validat-name/{userName}")
+	public ResponseEntity<Boolean> isUserExist(@PathVariable String userName){
+		boolean userExist = userService.isUserExist(userName);
+		return new ResponseEntity<Boolean>(userExist,HttpStatus.OK);
+    } 
+					
+	
+	
+	
 	@PostMapping("/create")
 	public ResponseEntity<User> registerUser(@RequestBody User user) {
 
@@ -51,11 +65,9 @@ public class UserController {
 			throw new UserNotValidException(violations.toString());
 		}
 
-		System.out.println("SUCCESS -- ");
 		
 		user.setUserPassword(passwordEncoder.encode(user.getUserPassword()));
 
-		System.out.println("password encoded ");
 		
 		
 		// all users defaultly having user role
@@ -65,23 +77,31 @@ public class UserController {
 		userRole.setRoleDescription("This is Default role for the Users");
 		defaultRoles.add(userRole);
 		user.setRole(defaultRoles);
-
-		System.out.println("user is going to create ");
-		
 		user = userService.addUser(user);
-		
-		System.out.println("created new user");
-		
 		return new ResponseEntity(user, HttpStatus.CREATED);
 	}
 
+	/*
+	 * @GetMapping("/get/{page}/{size}")
+	 * 
+	 * @PreAuthorize("hasRole('Admin')") public Page<User>
+	 * getUsers(@PathVariable(name = "page") int page,
+	 * 
+	 * @PathVariable(name = "size") int size) {
+	 * 
+	 * Page<User> usersList = userService.getAllUsers(page,size); return usersList;
+	 * }
+	 */
+
+	
 	@GetMapping("/get")
 	@PreAuthorize("hasRole('Admin')")
 	public List<User> getUsers() {
-		List<User> usersList = userService.getAllUsers();
+		List<User> usersList = userService.getUsers();
 		return usersList;
 	}
-
+	
+	
 	@GetMapping("/get/{userName}")
 	public User getUserByUserName(@PathVariable String userName) {
 		User user = userService.getUserByUserName(userName);
