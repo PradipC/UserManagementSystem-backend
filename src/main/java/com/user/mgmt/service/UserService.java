@@ -42,7 +42,7 @@ public class UserService {
 	}
 
 	public Page<User> getAllUsers(int page, int size) {
-		return userRepository.findAll(PageRequest.of(page, size));
+		return userRepository.findAllExceptAdmin(PageRequest.of(page, size));
 	}
 
 	public List<User> getUsers() {

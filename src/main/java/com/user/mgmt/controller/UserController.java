@@ -2,6 +2,7 @@ package com.user.mgmt.controller;
 
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -10,6 +11,7 @@ import javax.validation.ConstraintViolation;
 import javax.validation.Validator;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -21,6 +23,7 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.user.mgmt.entity.Role;
@@ -42,20 +45,16 @@ public class UserController {
 	private Validator validator;
 
 	@GetMapping("/ping")
-	public ResponseEntity<Boolean> ping(){
-		return new ResponseEntity<Boolean>(true,HttpStatus.OK);
-	} 
-	
-	
+	public ResponseEntity<Boolean> ping() {
+		return new ResponseEntity<Boolean>(true, HttpStatus.OK);
+	}
+
 	@GetMapping("/validat-name/{userName}")
-	public ResponseEntity<Boolean> isUserExist(@PathVariable String userName){
+	public ResponseEntity<Boolean> isUserExist(@PathVariable String userName) {
 		boolean userExist = userService.isUserExist(userName);
-		return new ResponseEntity<Boolean>(userExist,HttpStatus.OK);
-    } 
-					
-	
-	
-	
+		return new ResponseEntity<Boolean>(userExist, HttpStatus.OK);
+	}
+
 	@PostMapping("/create")
 	public ResponseEntity<User> registerUser(@RequestBody User user) {
 
@@ -65,11 +64,8 @@ public class UserController {
 			throw new UserNotValidException(violations.toString());
 		}
 
-		
 		user.setUserPassword(passwordEncoder.encode(user.getUserPassword()));
 
-		
-		
 		// all users defaultly having user role
 		Set<Role> defaultRoles = new HashSet<>();
 		Role userRole = new Role();
@@ -81,27 +77,15 @@ public class UserController {
 		return new ResponseEntity(user, HttpStatus.CREATED);
 	}
 
-	/*
-	 * @GetMapping("/get/{page}/{size}")
-	 * 
-	 * @PreAuthorize("hasRole('Admin')") public Page<User>
-	 * getUsers(@PathVariable(name = "page") int page,
-	 * 
-	 * @PathVariable(name = "size") int size) {
-	 * 
-	 * Page<User> usersList = userService.getAllUsers(page,size); return usersList;
-	 * }
-	 */
-
-	
 	@GetMapping("/get")
 	@PreAuthorize("hasRole('Admin')")
-	public List<User> getUsers() {
-		List<User> usersList = userService.getUsers();
+	public Page<User> getUsers(@RequestParam(defaultValue = "0") int page,
+			@RequestParam(defaultValue = "10") int size) {
+
+		Page<User> usersList = userService.getAllUsers(page, size);
 		return usersList;
 	}
-	
-	
+
 	@GetMapping("/get/{userName}")
 	public User getUserByUserName(@PathVariable String userName) {
 		User user = userService.getUserByUserName(userName);

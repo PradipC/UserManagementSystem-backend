@@ -15,11 +15,12 @@ import javax.validation.constraints.Size;
 
 import lombok.Getter;
 import lombok.Setter;
+import lombok.ToString;
 
 @Entity
 @Getter
 @Setter
-//@ToString
+@ToString(exclude = "role")
 public class User {
 
 	@Id
